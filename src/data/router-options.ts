@@ -1,9 +1,9 @@
 import { Page } from './page.ts';
 import { Route } from './route.ts';
 
-export interface RouterOptions<RouteOptions = any> {
+export interface RouterOptions<RouteOptions = any, RouteState = any> {
   root?: string,
-  routes?: Route<RouteOptions>[],
-  before?(page: Page): boolean;
-  page404?(fragment: string): void;
+  routes?: Route<RouteOptions, RouteState>[],
+  before?(page: Page<RouteOptions, RouteState>): boolean;
+  page404?(page: Page<RouteOptions, RouteState>): void;
 }

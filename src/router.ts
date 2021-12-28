@@ -4,13 +4,13 @@ import { RouterOptions } from './data/router-options.ts';
 
 import { trimSlashes, parseRouteRule } from './utils.ts';
 
-export class Router<RouteOptions = any> {
-  protected routes: Route<RouteOptions>[] = [];
+export class Router<RouteOptions = any, RouteState = any> {
+  protected routes: Route<RouteOptions, RouteState>[] = [];
   protected root = '/';
-  protected before?(page: Page): boolean;
-  protected page404?(fragment: string): void;
+  protected before?(page: Page<RouteOptions, RouteState>): boolean;
+  protected page404?(page: Page<RouteOptions, RouteState>): void;
 
-  constructor(options?: RouterOptions<RouteOptions>) {
+  constructor(options?: RouterOptions<RouteOptions, RouteState>) {
     this.before = options?.before;
     this.page404 = options?.page404;
 
@@ -27,13 +27,13 @@ export class Router<RouteOptions = any> {
     return this.root;
   }
 
-  addRoutes(routes: Route<RouteOptions>[]) {
+  addRoutes(routes: Route<RouteOptions, RouteState>[]) {
     for(const route of routes) {
       this.add(route.rule, route.handler, route.options);
     }
   }
 
-  add(rule: string | RegExp, handler?: (page: Page) => Promise<void>, options?: RouteOptions) {
+  add(rule: string | RegExp, handler?: (page: Page<RouteOptions, RouteState>) => Promise<void>, options?: RouteOptions) {
     this.routes.push({
       rule: parseRouteRule(rule),
       handler,
@@ -43,7 +43,7 @@ export class Router<RouteOptions = any> {
     return this;
   }
 
-  remove(param: string | RegExp | ((page: Page) => Promise<void>)) {
+  remove(param: string | RegExp | ((page: Page<RouteOptions, RouteState>) => Promise<void>)) {
     this.routes.some((route, i) => {
       if(route.handler === param || route.rule === parseRouteRule(param as string | RegExp)) {
         this.routes.splice(i, 1);
@@ -70,25 +70,31 @@ export class Router<RouteOptions = any> {
     }
   }
 
-  async processUrl(currentPath: string, currentQuery: { [key: string]: string }) {
+  async processUrl(currentPath: string, currentQuery: { [key: string]: string }, state?: RouteState) {
     const doBreak = this.before?.({
       fragment: currentPath,
-      query: currentQuery
+      query: currentQuery,
+      state
     });
 
     if(!doBreak) {
       const found = this.findRoute(currentPath);
 
       if(!found) {
-        this.page404?.(currentPath);
+        this.page404?.({
+          fragment: currentPath,
+          query: currentQuery,
+          state
+        });
       } else {
         found.match.shift();
 
-        const page: Page<RouteOptions> = {
+        const page: Page<RouteOptions, RouteState> = {
           fragment: currentPath,
           query: currentQuery,
           match: found.match,
-          options: found.route.options
+          options: found.route.options,
+          state
         };
 
         await found.route.handler?.(page);

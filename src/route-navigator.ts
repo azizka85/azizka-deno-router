@@ -2,14 +2,14 @@ import { Router } from './router.ts';
 
 import { transformURL, trimSlashes, parseQuery } from './utils.ts';
 
-export class RouteNavigator<RouteOptions = any> {
+export class RouteNavigator<RouteOptions = any, RouteState = any> {
   protected popStateHandler: () => void;
 
   constructor(
-    protected router: Router<RouteOptions>
+    protected router: Router<RouteOptions, RouteState>
   ) { 
     this.popStateHandler = () => {
-      router.processUrl(this.fragment, this.query);
+      router.processUrl(this.fragment, this.query, history.state);
     };
   }  
 
@@ -27,7 +27,7 @@ export class RouteNavigator<RouteOptions = any> {
     return parseQuery(location.search);
   }
 
-  async redirectTo(url: string, state?: any) {
+  async redirectTo(url: string, state?: RouteState) {
     const newUrl = transformURL(url, this.fragment, this.router.rootPath);  
 
     history.replaceState(state, '', this.router.rootPath + newUrl);
@@ -35,10 +35,10 @@ export class RouteNavigator<RouteOptions = any> {
     const currentPath = this.fragment;
     const currentQuery = this.query;
     
-    await this.router.processUrl(currentPath, currentQuery);
+    await this.router.processUrl(currentPath, currentQuery, state);
   }
 
-  async navigateTo(url: string, state?: any) {
+  async navigateTo(url: string, state?: RouteState) {
     const newUrl = transformURL(url, this.fragment, this.router.rootPath);  
     
     history.pushState(state, '', this.router.rootPath + newUrl);
@@ -46,7 +46,7 @@ export class RouteNavigator<RouteOptions = any> {
     const currentPath = this.fragment;
     const currentQuery = this.query;
     
-    await this.router.processUrl(currentPath, currentQuery);
+    await this.router.processUrl(currentPath, currentQuery, state);
   }
 
   refresh() {
