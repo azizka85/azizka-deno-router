@@ -8,7 +8,7 @@ Deno.test('num route', async () => {
   let match: RegExpMatchArray | undefined;
 
   const router = new Router({
-    before: page => {
+    before: async (page) => {
       success = false;
       match = undefined;
       fragment = page.fragment;
@@ -50,7 +50,7 @@ Deno.test('word route', async () => {
   let match: RegExpMatchArray | undefined;
 
   const router = new Router({
-    before: page => {
+    before: async (page) => {
       success = false;
       match = undefined;
       fragment = page.fragment;
@@ -92,7 +92,7 @@ Deno.test('any route', async () => {
   let match: RegExpMatchArray | undefined;
 
   const router = new Router({
-    before: page => {
+    before: async (page) => {
       success = false;
       match = undefined;
       fragment = page.fragment;
@@ -150,7 +150,7 @@ Deno.test('locale route', async () => {
   let match: RegExpMatchArray | undefined;
 
   const router = new Router({
-    before: page => {
+    before: async (page) => {
       success = false;
       match = undefined;
       fragment = page.fragment;

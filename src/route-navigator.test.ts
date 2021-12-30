@@ -11,7 +11,7 @@ Deno.test('navigate to (kz|ru|en)/test', async () => {
   let match: RegExpMatchArray | undefined;
 
   const router = new Router({
-    before: page => {
+    before: async (page) => {
       success = false;
       match = undefined;
       fragment = page.fragment;

@@ -7,8 +7,8 @@ import { trimSlashes, parseRouteRule } from './utils.ts';
 export class Router<RouteOptions = any, RouteState = any> {
   protected routes: Route<RouteOptions, RouteState>[] = [];
   protected root = '/';
-  protected before?(page: Page<RouteOptions, RouteState>): boolean;
-  protected page404?(page: Page<RouteOptions, RouteState>): void;
+  protected before?(page: Page<RouteOptions, RouteState>): Promise<boolean>;
+  protected page404?(page: Page<RouteOptions, RouteState>): Promise<void>;
 
   constructor(options?: RouterOptions<RouteOptions, RouteState>) {
     this.before = options?.before;
@@ -71,7 +71,7 @@ export class Router<RouteOptions = any, RouteState = any> {
   }
 
   async processUrl(currentPath: string, currentQuery: { [key: string]: string }, state?: RouteState) {
-    const doBreak = this.before?.({
+    const doBreak = await this.before?.({
       fragment: currentPath,
       query: currentQuery,
       state
@@ -81,7 +81,7 @@ export class Router<RouteOptions = any, RouteState = any> {
       const found = this.findRoute(currentPath);
 
       if(!found) {
-        this.page404?.({
+        await this.page404?.({
           fragment: currentPath,
           query: currentQuery,
           state
