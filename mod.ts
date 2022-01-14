@@ -2,7 +2,6 @@ export type { Page } from './src/data/page.ts';
 export type { Route } from './src/data/route.ts';
 export type { RouterOptions } from './src/data/router-options.ts';
 
-export * from './src/mocks/history-mock.ts';
 export { HistoryMock } from './src/mocks/types/history-mock.ts';
 
 export { 
